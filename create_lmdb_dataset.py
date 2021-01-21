@@ -28,25 +28,28 @@ def writeCache(env, cache):
 def get_gt_from_file_name(file_name, classes): 
     name = file_name.split('.')[0]    
     label = ''
-    conversion = {'~~Star~~':'*',
-                '~~BackSlash~~':'\\',
-                '~~Slash~~':'/' ,
-                '~~Colon~~':':',
-                '~~SemiColon~~':';',
-                '__LeftBrace__':'<',
-                '~~RightBrace~~':'>',
-                '~~underscore~~':'_',
-                '~~score~~':'-' ,
-                }
+    # conversion = {'~~Star~~':'*',
+    #             '~~BackSlash~~':'\\',
+    #             '~~Slash~~':'/' ,
+    #             '~~Colon~~':':',
+    #             '~~SemiColon~~':';',
+    #             '__LeftBrace__':'<',
+    #             '_':'<',
+    #             '~~RightBrace~~':'>',
+    #             '~~underscore~~':'_',
+    #             '~~score~~':'-' ,
+    #             }
 
-    for key, value in conversion.items():
-        name = name.replace(key, value)
+    # for key, value in conversion.items():
+    #     name = name.replace(key, value)
 
+    name = name.replace('__LeftBrace__','<')
+    name = name.replace('-', '<')
     name = name.split('_')[0]    
     for ch in name : 
         if classes.get(ch) is None:
-            print('unknown class: ' + ch)
-            #label += '<UNK>'
+            print(f'{file_name} unknown class: {ch}')
+            label += '<UNK>'
         else:
             label += ch
     return label
@@ -95,9 +98,6 @@ def createDataset(inputPath, outputPath, checkValid=True):
     import random 
 
     for image_path in glob.iglob(os.path.join(inputPath, "**"), recursive=True):
-        # if random.randrange(0, 10) > 2 :
-        #     continue        
-            
         if os.path.isfile(image_path): 
             _ , file_name = os.path.split(image_path)
             label = get_gt_from_file_name(file_name, classes) 
