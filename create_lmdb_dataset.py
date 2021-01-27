@@ -98,7 +98,6 @@ def createDataset(inputPath, outputPath, checkValid=True):
     import random 
 
     for image_path in glob.iglob(os.path.join(inputPath, "**"), recursive=True):
-            
         if os.path.isfile(image_path): 
             _ , file_name = os.path.split(image_path)
             label = get_gt_from_file_name(file_name, classes) 
