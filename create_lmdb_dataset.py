@@ -34,6 +34,7 @@ def get_gt_from_file_name(file_name, classes):
                 '~~Colon~~':':',
                 '~~SemiColon~~':';',
                 '__LeftBrace__':'<',
+                # '_':'<',
                 '~~RightBrace~~':'>',
                 '~~underscore~~':'_',
                 '~~score~~':'-' ,
@@ -42,11 +43,13 @@ def get_gt_from_file_name(file_name, classes):
     for key, value in conversion.items():
         name = name.replace(key, value)
 
+    # name = name.replace('__LeftBrace__','<')
+    # name = name.replace('-', '<')
     name = name.split('_')[0]    
     for ch in name : 
         if classes.get(ch) is None:
             print('unknown class: ' + ch)
-            #label += '<UNK>'
+            label += '<UNK>'
         else:
             label += ch
     return label
@@ -95,8 +98,6 @@ def createDataset(inputPath, outputPath, checkValid=True):
     import random 
 
     for image_path in glob.iglob(os.path.join(inputPath, "**"), recursive=True):
-        # if random.randrange(0, 10) > 2 :
-        #     continue        
             
         if os.path.isfile(image_path): 
             _ , file_name = os.path.split(image_path)

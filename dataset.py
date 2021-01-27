@@ -301,27 +301,48 @@ class AlignCollate(object):
         if self.keep_ratio_with_pad:  # same concept with 'Rosetta' paper
             resized_max_w = self.imgW
             input_channel = 3 if images[0].mode == 'RGB' else 1
-            transform = NormalizePAD((input_channel, self.imgH, resized_max_w))
+            # transform = NormalizePAD((input_channel, self.imgH, resized_max_w))
 
+            max_width = max([math.ceil(self.imgH * image.size[0]/float(image.size[1])) for image in images])
+            transform = NormalizePAD((input_channel, self.imgH, max_width))
             resized_images = []
             for image in images:
-                w, h = image.size
-                ratio = w / float(h)
-                if math.ceil(self.imgH * ratio) > self.imgW:
-                    resized_w = self.imgW
-                else:
-                    resized_w = math.ceil(self.imgH * ratio)
-
-                resized_image = image.resize((resized_w, self.imgH), Image.BICUBIC)
+                resized_image = image.resize((max_width, self.imgH), Image.BICUBIC)
                 resized_images.append(transform(resized_image))
-                # resized_image.save('./image_test/%d_test.jpg' % w)
 
             image_tensors = torch.cat([t.unsqueeze(0) for t in resized_images], 0)
 
         else:
-            transform = ResizeNormalize((self.imgW, self.imgH))
+            max_width = max([math.ceil(self.imgH * image.size[0]/float(image.size[1])) for image in images])
+            transform = ResizeNormalize((max_width, self.imgH))
             image_tensors = [transform(image) for image in images]
             image_tensors = torch.cat([t.unsqueeze(0) for t in image_tensors], 0)
+
+
+        # if self.keep_ratio_with_pad:  # same concept with 'Rosetta' paper
+        #     resized_max_w = self.imgW
+        #     input_channel = 3 if images[0].mode == 'RGB' else 1
+        #     transform = NormalizePAD((input_channel, self.imgH, resized_max_w))
+
+        #     resized_images = []
+        #     for image in images:
+        #         w, h = image.size
+        #         ratio = w / float(h)
+        #         if math.ceil(self.imgH * ratio) > self.imgW:
+        #             resized_w = self.imgW
+        #         else:
+        #             resized_w = math.ceil(self.imgH * ratio)
+
+        #         resized_image = image.resize((resized_w, self.imgH), Image.BICUBIC)
+        #         resized_images.append(transform(resized_image))
+        #         # resized_image.save('./image_test/%d_test.jpg' % w)
+
+        #     image_tensors = torch.cat([t.unsqueeze(0) for t in resized_images], 0)
+
+        # else:
+        #     transform = ResizeNormalize((self.imgW, self.imgH))
+        #     image_tensors = [transform(image) for image in images]
+        #     image_tensors = torch.cat([t.unsqueeze(0) for t in image_tensors], 0)
 
         return image_tensors, labels
 
