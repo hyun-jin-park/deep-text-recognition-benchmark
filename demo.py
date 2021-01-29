@@ -106,11 +106,15 @@ def demo(opt):
                 gt = img_name.split('_L_')[1]
                 gt = gt.split('.')[0]
                 pred = pred.split('.')[0]
+                if img_name.find('1_225427_L_대전출입국관리사무소_L_21.png') >=0 :
+                    print(f'{img_name:25s}\t{pred:25s}\t{confidence_score:0.4f}')
+
                 if gt.split('(')[0] != pred.split('(')[0]:
                     fail_count += 1
                     log.write(f'{img_name:25s}\t{pred:25s}\t{confidence_score:0.4f}\n')
                 else:
-                    print(f'{img_name:25s}\t{pred:25s}\t{confidence_score:0.4f}')
+                    # print(f'{img_name:25s}\t{pred:25s}\t{confidence_score:0.4f}')
+                    pass
                 sample_count += 1
         log.close()
         print (f'total accuracy: {(sample_count-fail_count)/sample_count:.2f}')
