@@ -5,7 +5,7 @@ import six
 import math
 import lmdb
 import torch
-
+import random
 from natsort import natsorted
 from PIL import Image
 import numpy as np
@@ -212,6 +212,9 @@ class LmdbDataset(Dataset):
             # We only train and evaluate on alphanumerics (or pre-defined character set in train.py)
             out_of_char = f'[^{self.opt.character}]'
             label = re.sub(out_of_char, '', label)
+            if random.random() > 0.5:
+                angle = random.randint(-2, 2)
+                img = transforms.functional.rotate(img, angle, expand=True)
 
         return (img, label)
 

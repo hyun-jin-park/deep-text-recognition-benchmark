@@ -46,7 +46,7 @@ def get_gt_from_file_name(file_name, classes):
     # name = name.replace('__LeftBrace__','<')
     # name = name.replace('-', '<')
     name = name.split('_')[0]    
-    for ch in name : 
+    for ch in name:
         if classes.get(ch) is None:
             print('unknown class: ' + ch)
             label += '<UNK>'
@@ -55,28 +55,31 @@ def get_gt_from_file_name(file_name, classes):
     return label
 
 
-def load_classes_dictionary(file_path):
+def load_classes_dictionary(file_path, include_space=False):
     classes = {} 
     with open (file_path, 'r') as f:
         lines = f.readlines()
         for line in lines: 
             id, label = line.strip().split()
-            classes[label] = id 
+            classes[label] = id
+    if include_space :
+        classes[' '] = str(int(id) + 1)
     return classes
 
 
-def createDataset(inputPath, outputPath, checkValid=True):
+def createDataset(inputPath, outputPath, checkValid=True, use_space=True):
     """
     Create LMDB dataset for training and evaluation.
     ARGS:
         inputPath  : input folder path where starts imagePath
         outputPath : LMDB output path
         checkValid : if true, check the validity of every image
+        use_space : if true add space classes
     """
     os.makedirs(outputPath, exist_ok=True)
     env_train = lmdb.open(os.path.join(outputPath, 'train'), map_size=1099511627776)
     env_val = lmdb.open(os.path.join(outputPath, 'val'), map_size=1099511627776)
-    classes = load_classes_dictionary(os.path.join(inputPath, 'kr_labels.txt'))
+    classes = load_classes_dictionary(os.path.join(inputPath, 'kr_labels.txt'), use_space)
     cache_train = {}
     cache_val = {}
 

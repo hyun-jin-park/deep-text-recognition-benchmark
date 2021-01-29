@@ -273,6 +273,7 @@ if __name__ == '__main__':
     parser.add_argument('--output_channel', type=int, default=512,
                         help='the number of output channel of Feature extractor')
     parser.add_argument('--hidden_size', type=int, default=256, help='the size of the LSTM hidden state')
+    parser.add_argument('--include_space', type=bool, default=True)
 
     opt = parser.parse_args()
 
@@ -293,6 +294,9 @@ if __name__ == '__main__':
         lines = f.readlines()
         for line in lines:
             opt.character.append(line.split()[1])
+
+    if opt.include_space:
+        opt.character.append(' ')
 
     """ Seed and GPU setting """
     # print("Random Seed: ", opt.manualSeed)
