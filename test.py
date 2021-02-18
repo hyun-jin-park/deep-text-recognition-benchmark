@@ -145,13 +145,13 @@ def validation(model, criterion, evaluation_loader, converter, opt):
                 pred_max_prob = pred_max_prob[:pred_EOS]
 
             # To evaluate 'case sensitive model' with alphanumeric and case insensitve setting.
-            if opt.sensitive and opt.data_filtering_off:
-                pred = pred.lower()
-                gt = gt.lower()
-                alphanumeric_case_insensitve = '0123456789abcdefghijklmnopqrstuvwxyz'
-                out_of_alphanumeric_case_insensitve = f'[^{alphanumeric_case_insensitve}]'
-                pred = re.sub(out_of_alphanumeric_case_insensitve, '', pred)
-                gt = re.sub(out_of_alphanumeric_case_insensitve, '', gt)
+            # if opt.sensitive and opt.data_filtering_off:
+            #     pred = pred.lower()
+            #     gt = gt.lower()
+            #     alphanumeric_case_insensitve = '0123456789abcdefghijklmnopqrstuvwxyz'
+            #     out_of_alphanumeric_case_insensitve = f'[^{alphanumeric_case_insensitve}]'
+            #     pred = re.sub(out_of_alphanumeric_case_insensitve, '', pred)
+            #     gt = re.sub(out_of_alphanumeric_case_insensitve, '', gt)
 
             if pred == gt:
                 n_correct += 1

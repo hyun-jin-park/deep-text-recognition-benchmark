@@ -273,6 +273,7 @@ if __name__ == '__main__':
     parser.add_argument('--output_channel', type=int, default=512,
                         help='the number of output channel of Feature extractor')
     parser.add_argument('--hidden_size', type=int, default=256, help='the size of the LSTM hidden state')
+    parser.add_argument('--include_space', type=bool, default=False)
 
     opt = parser.parse_args()
 
@@ -292,7 +293,15 @@ if __name__ == '__main__':
     with open(os.path.join(opt.train_data, 'kr_labels.txt'), 'r') as f:
         lines = f.readlines()
         for line in lines:
-            opt.character.append(line.split()[1])
+            ch = line.strip().split()[1]
+            if len(ch) != 1:
+                print(f'{ch}s length is greater than 1')
+            opt.character.append(ch)
+    print(f'character loaded {opt.character}')
+
+    print(f'include space option: {opt.include_space}')
+    if opt.include_space:
+        opt.character.append(' ')
 
     """ Seed and GPU setting """
     # print("Random Seed: ", opt.manualSeed)
