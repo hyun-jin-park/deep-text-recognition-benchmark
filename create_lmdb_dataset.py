@@ -26,7 +26,7 @@ def writeCache(env, cache):
 
 
 def get_gt_from_file_name(file_name, classes): 
-    name = file_name.split('.')[0]    
+    name = '.'.join(file_name.split('.')[:-1])
     label = ''
     conversion = {'~~Star~~':'*',
                 '~~BackSlash~~':'\\',
@@ -111,6 +111,10 @@ def createDataset(inputPath, outputPath, checkValid=True, use_space=True):
         #This time I decieded to remove samples which have <UNK> character 
         if label.find('<UNK>') >= 0 : 
             continue 
+
+        if len(label) > 30 :
+            print(f'skip {label} {len(label)}')
+            continue
 
         with open(image_path, 'rb') as f:
             imageBin = f.read()

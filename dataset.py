@@ -161,14 +161,14 @@ class LmdbDataset(Dataset):
                     label = txn.get(label_key).decode('utf-8')
 
                     if len(label) > self.opt.batch_max_length:
-                        # print(f'The length of the label is longer than max_length: length
-                        # {len(label)}, {label} in dataset {self.root}')
+                        print(f'The length of the label is longer than max_length: length {len(label)}, {label} in dataset {self.root}')
                         continue
 
                     # By default, images containing characters which are not in opt.character are filtered.
                     # You can add [UNK] token to `opt.character` in utils.py instead of this filtering.
                     out_of_char = f'[^{self.opt.character}]'
                     if re.search(out_of_char, label.lower()):
+                        print(f'{out_of_char} is lower')
                         continue
 
                     self.filtered_index_list.append(index)
@@ -316,8 +316,9 @@ class AlignCollate(object):
             image_tensors = torch.cat([t.unsqueeze(0) for t in resized_images], 0)
 
         else:
-            max_width = max([math.ceil(self.imgH * image.size[0]/float(image.size[1])) for image in images])
-            transform = ResizeNormalize((max_width, self.imgH))
+            #max_width = max([math.ceil(self.imgH * image.size[0]/float(image.size[1])) for image in images])
+            transform = ResizeNormalize((self.imgW, self.imgH))
+ #           transform = ResizeNormalize((max_width, self.imgH))
             image_tensors = [transform(image) for image in images]
             image_tensors = torch.cat([t.unsqueeze(0) for t in image_tensors], 0)
 

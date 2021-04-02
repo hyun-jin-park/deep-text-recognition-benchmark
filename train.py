@@ -232,7 +232,7 @@ if __name__ == '__main__':
     parser.add_argument('--train_data', required=True, help='path to training dataset')
     parser.add_argument('--valid_data', required=True, help='path to validation dataset')
     parser.add_argument('--manualSeed', type=int, default=1111, help='for random seed setting')
-    parser.add_argument('--workers', type=int, help='number of data loading workers', default=8)
+    parser.add_argument('--workers', type=int, help='number of data loading workers', default=4)
     parser.add_argument('--batch_size', type=int, default=192, help='input batch size')
     parser.add_argument('--num_iter', type=int, default=300000, help='number of iterations to train for')
     parser.add_argument('--valInterval', type=int, default=2000, help='Interval between each validation')
@@ -273,7 +273,7 @@ if __name__ == '__main__':
     parser.add_argument('--output_channel', type=int, default=512,
                         help='the number of output channel of Feature extractor')
     parser.add_argument('--hidden_size', type=int, default=256, help='the size of the LSTM hidden state')
-    parser.add_argument('--include_space', type=bool, default=True)
+    parser.add_argument('--include_space', type=bool, default=False)
 
     opt = parser.parse_args()
 
@@ -293,8 +293,13 @@ if __name__ == '__main__':
     with open(os.path.join(opt.train_data, 'kr_labels.txt'), 'r') as f:
         lines = f.readlines()
         for line in lines:
-            opt.character.append(line.split()[1])
+            ch = line.strip().split()[1]
+            if len(ch) != 1:
+                print(f'{ch}s length is greater than 1')
+            opt.character.append(ch)
+    print(f'character loaded {opt.character}')
 
+    print(f'include space option: {opt.include_space}')
     if opt.include_space:
         opt.character.append(' ')
 
