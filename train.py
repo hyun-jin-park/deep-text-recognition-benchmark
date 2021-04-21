@@ -13,7 +13,7 @@ import torch.utils.data
 import numpy as np
 
 from utils import CTCLabelConverter, CTCLabelConverterForBaiduWarpctc, AttnLabelConverter, Averager
-from dataset import hierarchical_dataset, AlignCollate, Batch_Balanced_Dataset
+from dataset import hierarchical_dataset, AlignCollate, Batch_Balanced_Dataset, RawDataset
 from model import Model
 from test import validation
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
@@ -32,13 +32,16 @@ def train(opt):
 
     log = open(f'./saved_models/{opt.exp_name}/log_dataset.txt', 'a')
     AlignCollate_valid = AlignCollate(imgH=opt.imgH, imgW=opt.imgW, keep_ratio_with_pad=opt.PAD)
-    valid_dataset, valid_dataset_log = hierarchical_dataset(root=opt.valid_data, opt=opt)
+
+    # valid_dataset, valid_dataset_log = hierarchical_dataset(root=opt.valid_data, opt=opt)
+    valid_dataset = RawDataset(root=opt.valid_data, opt=opt)  # use RawDataset
     valid_loader = torch.utils.data.DataLoader(
         valid_dataset, batch_size=opt.batch_size,
-        shuffle=True,  # 'True' to check training progress with validation function.
+        # shuffle=True,  # 'True' to check training progress with validation function.
+        shuffle=False,
         num_workers=int(opt.workers),
         collate_fn=AlignCollate_valid, pin_memory=True)
-    log.write(valid_dataset_log)
+
     print('-' * 80)
     log.write('-' * 80 + '\n')
     log.close()
@@ -141,7 +144,9 @@ def train(opt):
     best_accuracy = -1
     best_norm_ED = -1
     iteration = start_iter
+    start_time = time.time()
 
+    print(f'{iteration}: {time.time() - start_time:.1f}', flush=True)
     while(True):
         # train part
         image_tensors, labels = train_dataset.get_batch()
@@ -170,6 +175,10 @@ def train(opt):
         optimizer.step()
 
         loss_avg.add(cost)
+
+        if iteration % 100 == 0:
+            print(f'{iteration}: {time.time() - start_time:.1f}', flush=True)
+
 
         # validation part
         if (iteration + 1) % opt.valInterval == 0 or iteration == 0: # To see training progress, we also conduct validation when 'iteration == 0' 

@@ -62,7 +62,7 @@ def load_classes_dictionary(file_path, include_space=False):
         for line in lines: 
             id, label = line.strip().split()
             classes[label] = id
-    if include_space :
+    if include_space:
         classes[' '] = str(int(id) + 1)
     return classes
 

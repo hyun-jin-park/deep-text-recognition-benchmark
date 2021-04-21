@@ -253,7 +253,9 @@ class RawDataset(Dataset):
             else:
                 img = Image.new('L', (self.opt.imgW, self.opt.imgH))
 
-        return (img, self.image_path_list[index])
+        label = self.image_path_list[index].split('_L_')[1]
+        return img, label
+        # return (img, self.image_path_list[index])
 
 
 class ResizeNormalize(object):

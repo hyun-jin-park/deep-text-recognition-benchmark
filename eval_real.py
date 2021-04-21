@@ -6,6 +6,7 @@ import torch
 import torch.backends.cudnn as cudnn
 import torch.utils.data
 import torch.nn.functional as F
+from torchvision.transforms import ToPILImage
 from collections import OrderedDict
 
 from utils import CTCLabelConverter, AttnLabelConverter
@@ -23,6 +24,7 @@ def copy_state_dict(state_dict):
         name = ".".join(k.split(".")[start_idx:])
         new_state_dict[name] = v
     return new_state_dict
+
 
 def demo(opt):
     """ model configuration """
@@ -54,6 +56,7 @@ def demo(opt):
         num_workers=int(opt.workers),
         collate_fn=AlignCollate_demo, pin_memory=True)
 
+    log = open(f'./log_demo_result.txt', 'a')
     # predict
     model.eval()
     fail_count, sample_count = 0, 0
@@ -82,7 +85,6 @@ def demo(opt):
                 preds_str = converter.decode(preds_index, length_for_pred)
 
 
-            log = open(f'./log_demo_result.txt', 'a')
             dashed_line = '-' * 80
             head = f'{"image_path":25s}\t{"predicted_labels":25s}\tconfidence score'
             
@@ -91,7 +93,7 @@ def demo(opt):
 
             preds_prob = F.softmax(preds, dim=2)
             preds_max_prob, _ = preds_prob.max(dim=2)
-            for img_name, pred, pred_max_prob in zip(image_path_list, preds_str, preds_max_prob):
+            for gt, pred, pred_max_prob in zip(image_path_list, preds_str, preds_max_prob):
                 if 'Attn' in opt.Prediction:
                     pred_EOS = pred.find('[s]')
                     pred = pred[:pred_EOS]  # prune after "end of sentence" token ([s])
@@ -103,31 +105,40 @@ def demo(opt):
                 else:
                     confidence_score = 0.0
 
-                gt = img_name.split('_L_')[1]
-                gt = gt.split('.')[0]
-                pred = pred.split('.')[0]
+                # gt = img_name.split('_L_')[1]
+                # gt = gt.split('.')[0]
+                # pred = pred.split('.')[0]
+                # except IndexError:
+                #     print(f'Index Error {img_name}')
+                #     raise IndexError
                 # if img_name.find('1_225427_L_대전출입국관리사무소_L_21.png') >=0 :
                 #     print(f'{img_name:25s}\t{pred:25s}\t{confidence_score:0.4f}')
 
                 if gt.split('(')[0] != pred.split('(')[0]:
                     fail_count += 1
-                    log.write(f'{img_name:25s}\t{pred:25s}\t{confidence_score:0.4f}\n')
+                    log.write(f'{gt:25s}\t{pred:25s}\t{confidence_score:0.4f}\n')
+                    # import shutil
+                    # shutil.copy(gt, os.path.join('./result', os.path.basename(img_name)))
                 else:
-                    print(f'{img_name:25s}\t{pred:25s}\t{confidence_score:0.4f}')
+                    print(f'{gt:25s}\t{pred:25s}\t{confidence_score:0.4f}')
                     pass
                 sample_count += 1
         log.close()
         print (f'total accuracy: {(sample_count-fail_count)/sample_count:.2f}')
 
+
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     # parser.add_argument('--image_folder', required=True, help='path to image_folder which contains text images')
-    parser.add_argument('--image_folder', default='./data/card_evaluation/', type=str,
+    parser.add_argument('--image_folder', default='./data/evaluation/valid_card_data/', type=str,
                         help='path to image_folder which contains text images')
     parser.add_argument('--workers', type=int, help='number of data loading workers', default=4)
     parser.add_argument('--batch_size', type=int, default=16, help='input batch size')
     # parser.add_argument('--saved_model', required=True, help="path to saved_model to evaluation")
-    parser.add_argument('--saved_model', default='./saved_model/best_accuracy.pth', help="path to saved_model to evaluation")
+    # parser.add_argument('--saved_model', default='./saved_models/TPS-ResNet-BiLSTM-Attn-Seed1111/backup/91.307.pth', help="path to saved_model to evaluation")
+    # parser.add_argument('--saved_model', default='./saved_models/TPS-ResNet-BiLSTM-Attn-Seed1111/devrack.pth',
+    parser.add_argument('--saved_model', default='./saved_models/TPS-ResNet-BiLSTM-Attn-Seed1111.98.143/best_accuracy.pth',
+                        help="path to saved_model to evaluation")
     """ Data processing """
     parser.add_argument('--batch_max_length', type=int, default=36, help='maximum-label-length')
     parser.add_argument('--imgH', type=int, default=32, help='the height of the input image')
@@ -161,7 +172,7 @@ if __name__ == '__main__':
     # if opt.sensitive:
     #     opt.character = string.printable[:-6]  # same with ASTER setting (use 94 char).
     opt.character = []
-    with open('./saved_model/kr_labels_v2.txt', 'r') as f:
+    with open('./saved_models/kr_labels_v2.txt', 'r') as f:
         lines = f.readlines()
         for line in lines:
             opt.character.append(line.split()[1])

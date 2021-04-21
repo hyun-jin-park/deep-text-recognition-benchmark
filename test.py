@@ -272,8 +272,16 @@ if __name__ == '__main__':
     opt = parser.parse_args()
 
     """ vocab / character number configuration """
-    if opt.sensitive:
-        opt.character = string.printable[:-6]  # same with ASTER setting (use 94 char).
+
+    opt.character = []
+    # with open(os.path.join(opt.eval_data, 'kr_labels_old.txt'), 'r') as f:
+    with open(os.path.join(opt.eval_data, 'kr_labels.txt'), 'r') as f:
+        lines = f.readlines()
+        for line in lines:
+            ch = line.strip().split()[1]
+            if len(ch) != 1:
+                print(f'{ch}s length is greater than 1')
+            opt.character.append(ch)
 
     cudnn.benchmark = True
     cudnn.deterministic = True
